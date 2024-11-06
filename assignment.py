@@ -229,7 +229,7 @@ def plot_median_filtered(id, image, noisy_images):
   plt.show()
 
 def plot_bilateral_filtered(id, image, noisy_images):
-   print("Bilateral filter with : image ", id)
+   print("Bilateral filter: image ", id)
    for i, (key, noisy_img) in enumerate(noisy_images.items(), start=1):    #plot images after filters
     blur = cv.bilateralFilter(noisy_img,9,75,75)
     plt.subplot(2, 3, i)
@@ -260,19 +260,29 @@ assert image1 is not None, "file could not be read, check with os.path.exists()"
 
 noisy_images = add_noise(image1)
 display_original_and_noisy(image1, noisy_images)
-#plot_box_filtered(1, image1, noisy_images)
-#plot_gaussian_filtered(1, image1, noisy_images)
+plot_box_filtered(1, image1, noisy_images)
+'''
+plot_gaussian_filtered(1, image1, noisy_images)
 plot_median_filtered(1, image1, noisy_images)
+plot_bilateral_filtered(1, image1, noisy_images)
+'''
 
 
 '''
 noisy_images = add_noise(image2)
 display_original_and_noisy(image2, noisy_images)
-plot_filterd(2, image2, noisy_images)
+plot_box_filtered(2, image2, noisy_images)
+plot_gaussian_filtered(2, image2, noisy_images)
+plot_median_filtered(2, image2, noisy_images)
+plot_bilateral_filtered(2, image2, noisy_images)
+
 
 noisy_images = add_noise(image3)
 display_original_and_noisy(image3, noisy_images)
-plot_filterd(3, image3, noisy_images)
+plot_box_filtered(3, image3, noisy_images)
+plot_gaussian_filtered(3, image3, noisy_images)
+plot_median_filtered(3, image3, noisy_images)
+plot_bilateral_filtered(3, image3, noisy_images)
 '''
 
 
