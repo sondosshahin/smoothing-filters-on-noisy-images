@@ -54,9 +54,11 @@ def display_original_and_noisy(image, noisy_images):
 
 
 def plot_box_filtered(id, image, noisy_images, kernel_size):
+  filtered_images = {}
   print(f"Box filter with kernel {kernel_size}x{kernel_size} : image ", id)
   for i, (key, noisy_img) in enumerate(noisy_images.items(), start=1):    #plot images after filters
     blur = cv.blur(noisy_img,(kernel_size,kernel_size))    #box filter
+    filtered_images[key] = blur
     plt.subplot(2, 3, i)
     plt.imshow(blur)
     plt.title(key)
@@ -72,12 +74,15 @@ def plot_box_filtered(id, image, noisy_images, kernel_size):
   plt.tight_layout()
   plt.suptitle(f"Box filter with kernel {kernel_size}x{kernel_size}")
   plt.show()
+  return filtered_images
 
 
 def plot_gaussian_filtered(id, image, noisy_images, kernel_size):
+  filtered_images = {}
   print(f"Gaussian filter with kernel {kernel_size}x{kernel_size}: image ", id)
   for i, (key, noisy_img) in enumerate(noisy_images.items(), start=1):    #plot images after filters
     blur = cv.GaussianBlur(noisy_img,(kernel_size,kernel_size),0)
+    filtered_images[key] = blur
     plt.subplot(2, 3, i)
     plt.imshow(blur)
     plt.title(key)
@@ -93,12 +98,15 @@ def plot_gaussian_filtered(id, image, noisy_images, kernel_size):
   plt.tight_layout()
   plt.suptitle(f"Gaussian filter with kernel {kernel_size}x{kernel_size}")
   plt.show()
+  return filtered_images
 
 
 def plot_median_filtered(id, image, noisy_images, kernel_size):
+  filtered_images = {}
   print(f"Median filter with kernel {kernel_size}x{kernel_size}: image ", id)
   for i, (key, noisy_img) in enumerate(noisy_images.items(), start=1):    #plot images after filters
     blur = cv.medianBlur(noisy_img,kernel_size)
+    filtered_images[key] = blur
     plt.subplot(2, 3, i)
     plt.imshow(blur)
     plt.title(key)
@@ -114,12 +122,15 @@ def plot_median_filtered(id, image, noisy_images, kernel_size):
   plt.tight_layout()
   plt.suptitle(f"Median filter with kernel {kernel_size}x{kernel_size}")
   plt.show()
+  return filtered_images
 
 
 def plot_bilateral_filtered(id, image, noisy_images, kernel_size):
+   filtered_images = {}
    print(f"Bilateral filter with kernel {kernel_size}x{kernel_size}: image ", id)
    for i, (key, noisy_img) in enumerate(noisy_images.items(), start=1):    #plot images after filters
     blur = cv.bilateralFilter(noisy_img,kernel_size,75,75)
+    filtered_images[key] = blur
     plt.subplot(2, 3, i)
     plt.imshow(blur)
     plt.title(key)
@@ -135,10 +146,12 @@ def plot_bilateral_filtered(id, image, noisy_images, kernel_size):
    plt.tight_layout()
    plt.suptitle(f"Bilateral filter with kernel {kernel_size}x{kernel_size}")
    plt.show()
+   return filtered_images
 
 
 
 def plot_adaptive_mean_filtered(id, image, noisy_images, kernel_size):
+  filtered_images = {}
   print(f"Adaptive Mean filter with kernel {kernel_size}x{kernel_size}: image ", id)
   for i, (key, noisy_img) in enumerate(noisy_images.items(), start=1):    #plot images after filters
     # Get image dimensions
@@ -159,6 +172,7 @@ def plot_adaptive_mean_filtered(id, image, noisy_images, kernel_size):
             result[k, j] = image[k, j] - local_mean + local_mean
     # Clip values to maintain valid range and convert back to original type
     result = np.clip(result, 0, 255).astype(np.uint8)
+    filtered_images[key] = result
     plt.subplot(2, 3, i)
     plt.imshow(result)
     plt.title(key)
@@ -174,9 +188,11 @@ def plot_adaptive_mean_filtered(id, image, noisy_images, kernel_size):
   plt.tight_layout()
   plt.suptitle(f"Adaptive Mean filter with kernel {kernel_size}x{kernel_size}: image")
   plt.show()
+  return filtered_images
 
 
 def plot_adaptive_median_filtered(id, image, noisy_images, kernel_size):
+  filtered_images = {}
   print(f"Adaptive Median filter with kernel {kernel_size}x{kernel_size}: image: ", id)
   for i, (key, noisy_img) in enumerate(noisy_images.items(), start=1):    #plot images after filters
     rows, cols = image.shape
@@ -192,6 +208,7 @@ def plot_adaptive_median_filtered(id, image, noisy_images, kernel_size):
             local_mean = np.median(local_region)
             result[k, j] = image[k, j] - local_mean + local_mean
     result = np.clip(result, 0, 255).astype(np.uint8)
+    filtered_images[key] = result
     plt.subplot(2, 3, i)
     plt.imshow(result)
     plt.title(key)
@@ -207,7 +224,18 @@ def plot_adaptive_median_filtered(id, image, noisy_images, kernel_size):
   plt.tight_layout()
   plt.suptitle(f"Adaptive Median filter with kernel {kernel_size}x{kernel_size}: image")
   plt.show()
+  return filtered_images
 
+def apply_canny( images, size, filter_name):
+  for i, (key, image) in enumerate(images.items(), start=1):  
+    edge = cv.Canny(image, 100,200)
+    plt.subplot(2, 3, i)
+    plt.imshow(edge)
+    plt.title(key)
+    plt.axis("off")
+  plt.tight_layout()
+  plt.suptitle(f"{filter_name} with kernel {size}x{size}:")
+  plt.show()
 
 image1 = cv.imread("sample_image1.png")
 assert image1 is not None, "file could not be read, check with os.path.exists()"
@@ -225,81 +253,59 @@ assert image3 is not None, "file could not be read, check with os.path.exists()"
 if len(image3.shape) == 3:
   image3 = cv.cvtColor(image3, cv.COLOR_BGR2GRAY)
 
-
-noisy_images = add_noise(image1)
-display_original_and_noisy(image1, noisy_images)
-
-'''
+images = [image1,image2,image3]
 kernel_sizes = [3, 5, 7]
-# Measure and report computational time for each kernel size
-for size in kernel_sizes:
+i=1
+for image in images:
+  noisy_images = add_noise(image)
+  display_original_and_noisy(image, noisy_images)
+  for size in kernel_sizes:
     print("Box filter")
     start_time = time.time()
-    filtered_image = plot_box_filtered(1, image1, noisy_images, size)
+    filtered = plot_box_filtered(i, image, noisy_images, size)
     end_time = time.time()
     computation = end_time - start_time
     print(f"Kernel size {size}x{size}: {computation:.4f} seconds")
+    apply_canny(filtered, size, filter_name="Box filter")
+
     print("Gaussian filter")
     start_time = time.time()
-    filtered_image = plot_gaussian_filtered(1, image1, noisy_images, size)
+    filtered = plot_gaussian_filtered(i, image, noisy_images, size)
     end_time = time.time()
     computation = end_time - start_time
     print(f"Kernel size {size}x{size}: {computation:.4f} seconds")
+    apply_canny(filtered, size, filter_name="Gaussian filter")
+
     print("Median filter")
     start_time = time.time()
-    filtered_image = plot_median_filtered(1, image1, noisy_images, size)
+    filtered = plot_median_filtered(i, image, noisy_images, size)
     end_time = time.time()
     computation = end_time - start_time
     print(f"Kernel size {size}x{size}: {computation:.4f} seconds")
+    apply_canny(filtered, size, filter_name="Median filter")
+
     print("Bilateral filter")
     start_time = time.time()
-    filtered_image = plot_bilateral_filtered(1, image1, noisy_images, size)
+    filtered = plot_bilateral_filtered(i, image, noisy_images, size)
     end_time = time.time()
     computation = end_time - start_time
     print(f"Kernel size {size}x{size}: {computation:.4f} seconds")
+    apply_canny(filtered, size, filter_name="Bilateral filter")
+
     print("Adaptive mean filter")
     start_time = time.time()
-    filtered_image = plot_adaptive_mean_filtered(1, image1, noisy_images, size)
+    filtered = plot_adaptive_mean_filtered(i, image, noisy_images, size)
     end_time = time.time()
     computation = end_time - start_time
     print(f"Kernel size {size}x{size}: {computation:.4f} seconds")
+    apply_canny(filtered, size, filter_name="Adaptive mean filter")
+
     print("Adaptive median filter")
     start_time = time.time()
-    filtered_image = plot_adaptive_median_filtered(1, image1, noisy_images, size)
+    filtered = plot_adaptive_median_filtered(i, image, noisy_images, size)
     end_time = time.time()
     computation = end_time - start_time
     print(f"Kernel size {size}x{size}: {computation:.4f} seconds")
-'''
-
-#plot_box_filtered(1, image1, noisy_images)
-#plot_adaptive_mean_filtered(1, image1, noisy_images)
-#plot_adaptive_median_filtered(1, image1, noisy_images)
-'''
-plot_gaussian_filtered(1, image1, noisy_images)
-plot_median_filtered(1, image1, noisy_images)
-plot_bilateral_filtered(1, image1, noisy_images)
-'''
-
-
-'''
-noisy_images = add_noise(image2)
-display_original_and_noisy(image2, noisy_images)
-plot_box_filtered(2, image2, noisy_images)
-plot_gaussian_filtered(2, image2, noisy_images)
-plot_median_filtered(2, image2, noisy_images)
-plot_bilateral_filtered(2, image2, noisy_images)
-plot_adaptive_mean_filtered(2, image2, noisy_images)
-plot_adaptive_median_filtered(2, image2, noisy_images)
-
-
-noisy_images = add_noise(image3)
-display_original_and_noisy(image3, noisy_images)
-plot_box_filtered(3, image3, noisy_images)
-plot_gaussian_filtered(3, image3, noisy_images)
-plot_median_filtered(3, image3, noisy_images)
-plot_bilateral_filtered(3, image3, noisy_images)
-plot_adaptive_mean_filtered(3, image3, noisy_images)
-plot_adaptive_median_filtered(3, image3, noisy_images)
-'''
-
+    apply_canny(filtered, size, filter_name="Adaptive median filter")
+  i=i+1
 
